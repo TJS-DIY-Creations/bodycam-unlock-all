@@ -1,0 +1,38 @@
+name: Validate and package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Lua syntax check
+        shell: pwsh
+        run: |
+          npm install --no-save --no-audit --no-fund luaparse
+          node -e "const fs=require('fs');const lp=require('luaparse');for(const f of ['src/BodycamUnlockAll/Scripts/main.lua','src/BodycamUnlockAll/Scripts/config.lua']){lp.parse(fs.readFileSync(f,'utf8'),{luaVersion:'5.3'});console.log('OK '+f)}"
+
+      - name: Build mod-only package
+        shell: pwsh
+        run: .\build\build-release.ps1 -ModOnly
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: bodycam-unlock-all-mod
+          path: |
+            dist/*.zip
+            dist/SHA256.txt
+            dist/release-notes-*.md

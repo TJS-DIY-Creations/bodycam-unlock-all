@@ -1,0 +1,12 @@
+# Build output
+dist/
+*.zip
+
+# Runtime files written by the mod
+unlock_status.txt
+unlock_log.txt
+
+# Local tooling
+node_modules/
+.vscode/
+*.bak
